@@ -32,7 +32,17 @@ module DownloadMokurokuNippo
     if $arg_data.download_nippo
       (Date.parse($arg_data.download_nippo_from)..Date.parse($arg_data.download_nippo_to)).each do |date|
         date_str = date.strftime("%Y%m%d")
-        download_file("https://cyberjapandata.gsi.go.jp/nippo/#{date_str}-nippo.csv.gz", "#{$WORK_FOLDER}/#{date_str}-nippo.csv.gz")
+        url = "https://cyberjapandata.gsi.go.jp/nippo/#{date_str}-nippo.csv.gz"
+        begin
+          download_file(url, "#{$WORK_FOLDER}/#{date_str}-nippo.csv.gz")
+        rescue
+          # 今日のファイルはまだない可能性があるため、エラーが起きても無視する
+          if date_str == Date.today.strftime("%Y%m%d")
+            $logger.info("本日のnippoのダウンロードに失敗(まだない可能性がある): #{url}")
+          else
+            raise $!
+          end
+        end
       end
     end
   end
@@ -55,7 +65,7 @@ module DownloadMokurokuNippo
           IO.copy_stream(res, local_path)
         end
       }
-    rescue TimeoutError => e
+    rescue Timeout::Error => e
       $logger.info(e)
     rescue OpenURI::HTTPError => e
       # 404 Not Found
