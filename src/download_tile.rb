@@ -87,11 +87,6 @@ module DownloadTile
           end
 
           if buf != nil
-            buf_md5 = Digest::MD5.hexdigest(buf)
-            if o[:md5] != buf_md5
-              $logger.error("MD5エラー : #{o[:url]}")
-              $status[:ng] += 1
-            else
               [File.dirname(o[:local_path])].each{|it|
                 FileUtils.mkdir_p(it) unless File.directory?(it)
               }
@@ -101,7 +96,6 @@ module DownloadTile
               File.utime(o[:date], o[:date], o[:local_path])
 
               $status[:ok] += 1
-            end
           end
         end
       end
@@ -170,7 +164,11 @@ module DownloadTile
   #
   def download_by_mokuroku(tile_id, mokuroku_file)
     Zlib::GzipReader.open(mokuroku_file) {|reader|
-      reader.each_line {|mokuroku_data|
+      reader.each_line.with_index {|mokuroku_data,line|
+        # 指定されたcomputer idが担当する範囲外は対象外(全量($count)にも入れない)
+        unless line % $arg_data.computers == $arg_data.computer_id - 1
+          next
+        end
         $count += 1
         (path, date, size, md5) = mokuroku_data.strip.split(',')
 
@@ -199,7 +197,12 @@ module DownloadTile
   #
   def download_by_nippo(tile_id, nippo_file)
     Zlib::GzipReader.open(nippo_file) {|reader|
-      reader.each_line {|nippo_data|
+      reader.each_line.with_index {|nippo_data,line|
+        # 指定されたcomputer idが担当する範囲外は対象外(全量($count)にも入れない)
+        unless line % $arg_data.computers == $arg_data.computer_id - 1
+          next
+        end
+
         $count += 1
         (path, date, size, md5) = nippo_data.strip.split(',')
         (tid, zoom) = path.split("/")
