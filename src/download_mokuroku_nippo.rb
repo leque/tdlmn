@@ -20,13 +20,13 @@ module DownloadMokurokuNippo
     CommonFunction.clear_folder($WORK_FOLDER)
 
     # mokurokuをダウンロード
-    if $arg_data.download_mokuroku
-      $iniFile.tile_ids.each{ |tile_id|
-        local_folder = "#{$WORK_FOLDER}/#{tile_id}"
-        FileUtils.mkdir_p(local_folder)
-        download_file("https://cyberjapandata.gsi.go.jp/xyz/#{tile_id}/mokuroku.csv.gz", "#{local_folder}/mokuroku.csv.gz")
-      }
-    end
+#    if $arg_data.download_mokuroku
+#      $iniFile.tile_ids.each{ |tile_id|
+#        local_folder = "#{$WORK_FOLDER}/#{tile_id}"
+#        FileUtils.mkdir_p(local_folder)
+#        download_file("https://cyberjapandata.gsi.go.jp/xyz/#{tile_id}/mokuroku.csv.gz", "#{local_folder}/mokuroku.csv.gz")
+#      }
+#    end
     
     # nippoをダウンロード
     if $arg_data.download_nippo
