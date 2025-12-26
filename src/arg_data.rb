@@ -10,6 +10,12 @@ class ArgData
   #
   def initialize(args)
   
+    # 実行するPCの数
+    @computers = 1
+
+    # PCのID (@computers以下の1からの連番)
+    @computer_id = 1
+
     # mokurokuをダウンロードするか (true / false)
     @download_mokuroku = false
     
@@ -36,7 +42,29 @@ class ArgData
     @invalid_option = false
   
     args.each{ |arg|
-      if arg == "-m"
+      if arg.start_with?("-c")
+        if arg.length < 3
+          $logger.error("-cの指定不正 : #{arg}")
+        else
+          num = arg[2..]
+          if num.match?(/\A\d+\z/)
+            @computers = num.to_i
+          else
+            $logger.error("-cの指定不正 : #{arg}")
+          end
+        end
+      elsif arg.start_with?("-i")
+        if arg.length < 3
+          $logger.error("-iの指定不正 : #{arg}")
+        else
+          num = arg[2..]
+          if num.match?(/\A\d+\z/)
+            @computer_id = num.to_i
+          else
+            $logger.error("-iの指定不正 : #{arg}")
+          end
+        end
+      elsif arg == "-m"
         # mokurokuをダウンロード
         @download_mokuroku = true
         
@@ -111,6 +139,14 @@ class ArgData
     end
 
     return true
+  end
+
+  def computers
+    @computers
+  end
+
+  def computer_id
+    @computer_id
   end
 
   def download_mokuroku
